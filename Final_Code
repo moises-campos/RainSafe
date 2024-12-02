@@ -1,0 +1,79 @@
+#include<Servo.h> 
+// Includes the Servo library, which provides functions to control servo motors.
+
+Servo servo1; 
+// Declares an object to control the first servo motor.
+
+Servo servo2; 
+// Declares an object to control the second servo motor.
+
+void setup() 
+{
+  servo1.attach(9); 
+  // Attaches servo1 to pin 9 on the microcontroller for PWM signal.
+
+  servo2.attach(10); 
+  // Attaches servo2 to pin 10 on the microcontroller for PWM signal.
+}
+
+void loop() 
+{
+  int joyStick = analogRead(A0); 
+  // Reads the analog value from pin A0, which represents joystick input (0–1023).
+
+  static int angle1 = map(joyStick, 0, 1023, 0, 180); 
+  // Maps joystick value to an angle range (0°–180°) for the first servo motor.
+  
+  static int angle2 = map(joyStick, 0, 1023, 180, 0); 
+  // Maps joystick value to an angle range (180°–0°) for the second servo motor (inverted).
+
+  static bool stop = true; 
+  // A flag to indicate whether the servos should be updated or stopped.
+
+  if (joyStick == 0 || joyStick == 1023) 
+  {
+    // Checks if the joystick is at its extreme positions (0 or 1023).
+
+    if (joyStick == 0) 
+    {
+      angle1 = max(0, angle1 - 1); 
+      // Decreases angle1 but ensures it doesn't go below 0°.
+
+      angle2 = min(180, angle2 + 1); 
+      // Increases angle2 but ensures it doesn't exceed 180°.
+    }
+
+    else if (joyStick == 1023) 
+    {
+      angle1 = min(180, angle1 + 1); 
+      // Increases angle1 but ensures it doesn't exceed 180°.
+
+      angle2 = max(0, angle2 - 1); 
+      // Decreases angle2 but ensures it doesn't go below 0°.
+    }
+
+    stop = false; 
+    // Indicates that the servos should be updated.
+  }
+
+  else if (!stop) 
+  {
+    // If the joystick moves away from extreme positions and the system was running:
+    stop = true; 
+    // Stops the servos from further updates.
+  }
+
+  if (!stop) 
+  {
+    // If the servos are allowed to update:
+
+    servo1.write(angle1); 
+    // Sets servo1 to the computed angle (angle1).
+
+    servo2.write(angle2); 
+    // Sets servo2 to the computed angle (angle2).
+
+    delay(30); 
+    // Adds a 30-millisecond delay to smooth out movements.
+  }
+}
